@@ -1,0 +1,10 @@
+package com.example.board.vel01.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.board.vel01.domain.Comment;
+
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+	
+	
+}

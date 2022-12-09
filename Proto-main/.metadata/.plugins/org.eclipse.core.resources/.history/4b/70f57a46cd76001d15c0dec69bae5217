@@ -1,0 +1,122 @@
+package com.example.board.vel01.domain;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "post_tb")
+public class Post {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "post_id")
+    private String id;
+	
+	@Column
+	@NotNull
+    private String nickName;
+	
+	@Column
+	@NotNull
+    private String title;
+	
+	@Column
+	@NotNull
+    private String content;
+	
+	@Column
+	@NotNull
+    private String comment;
+	
+	@Column
+    private Long viewCount;
+	
+	@Column
+	private String createdDate;
+	
+	private String err;
+   
+    @Getter@Setter
+	@ToString
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+    public static class Request{
+    	
+        private String nickName;
+        private String title;
+        private String content;
+        private String comment;
+        
+        public Request(final Post postEntity) {
+        	this.nickName = postEntity.getNickName();
+        	this.title = postEntity.getTitle();
+        	this.content = postEntity.getContent();
+        	this.comment = postEntity.getComment();
+        }
+    	
+    	public static Post toEntity(Post.Request req) {
+    		return Post.builder()
+    				.nickName(req.getNickName())
+    				.title(req.getTitle())
+    				.content(req.getContent())
+    				.comment(req.getComment())
+    				.build();
+    	}
+    }
+    
+    @Getter@Setter
+   	@ToString
+   	@Builder
+   	@NoArgsConstructor
+   	@AllArgsConstructor
+    public static class Response{
+    	
+        private String nickName;
+        private String title;
+        private String content;
+        private String comment;
+        private Long viewCount;
+        private String err;
+        
+    	
+    	public static Post.Response toResponse(Post postEntity){
+    		
+    		return Post.Response.builder()
+    				.nickName(postEntity.getNickName())
+    				.title(postEntity.getTitle())
+    				.content(postEntity.getContent())
+    				.comment(postEntity.getComment())
+    				.viewCount(postEntity.getViewCount())
+    				.build();
+    	}
+    	
+    	public static List<Post.Response> toResponseList(List<Post> posts){
+    		List<Post.Response> postList = new ArrayList<Post.Response>();
+    		for (Post post : posts) {
+				postList.add(toResponse(post));
+			}
+    		return postList;
+    	}
+    }
+    
+    
+}

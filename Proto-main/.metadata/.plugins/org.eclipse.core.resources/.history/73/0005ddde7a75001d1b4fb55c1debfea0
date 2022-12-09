@@ -1,0 +1,48 @@
+package com.example.board.vel01.base.jwt;
+
+
+import java.time.Duration;
+import java.util.Date;
+
+import com.example.board.vel01.domain.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+@RequiredArgsConstructor
+@Component
+public class JwtTokenProvider {
+
+    private final JwtProperties jwtProperties;
+
+    private final static String SECRET_KEY = "KTRKEKTEJTKJETJKERJTKFKJSFNNFFKFERKR";
+
+    public String makeJwtToken(User.Request user) {
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setIssuer(jwtProperties.getIssuer())
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + Duration.ofMinutes(30).toMillis()))
+                .claim("nickName", user.getNickName())
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+    
+    public String validateAndGetUserId(String token) {
+		Claims claims = Jwts.parser()
+				.setSigningKey(SECRET_KEY)
+				.parseClaimsJws(token)
+				.getBody();
+		
+		return claims.getSubject();
+	}
+
+
+
+
+
+}

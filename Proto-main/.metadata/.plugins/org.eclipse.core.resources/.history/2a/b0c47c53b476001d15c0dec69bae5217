@@ -1,0 +1,61 @@
+package com.example.board.vel01.api;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.board.vel01.domain.Comment;
+import com.example.board.vel01.repository.CommentRepository;
+import com.example.board.vel01.service.CommentService;
+
+@RestController
+@RequestMapping("comment")
+public class CommentController {
+	
+	
+private final CommentRepository commentRepository;
+
+private final CommentService commentService;
+	
+	// 댓글 작성 = C 
+	public ResponseEntity<?> createComment(Comment.Request req) {
+		Comment comment = Comment.Request.toEntity(req);
+		commentService.saveComment(comment);
+		
+		Comment.Response res = Comment.Response.toResponse(comment);
+		return ResponseEntity.ok().body(res);
+	}
+	
+	// 댓글 전체 조회 = R 
+	public List<Comment.Response> getCommentList() {
+		
+		List<Comment> comments = commentService.retrieveCommentList();
+		List<Comment.Response> commentList = Comment.Response.toResponseList(comments);
+		
+		return commentList;
+	}
+	
+	// 댓글 수정 = U
+	public ResponseEntity<?> updateComment(Comment.Request req){
+		Optional<Comment> comment = commentRepository.findById(req.getId());
+		Comment findComment = comment.get();
+		commentService.updateComment(findComment);
+		
+		return ResponseEntity.ok().body(findComment);
+	}
+	
+	// 댓글 삭제 = D
+	public ResponseEntity<?> deleteComment(Comment.Request req){
+		Optional<Comment> comment = commentRepository.findById(req.getId());
+		Comment findComment = comment.get();
+		commentRepository.delete(findComment);
+		List<Comment> comments = commentRepository.findAll();
+		List<Comment.Response> commentList = Comment.Response.toResponseList(comments);
+		
+		return ResponseEntity.ok().body(commentList);
+}

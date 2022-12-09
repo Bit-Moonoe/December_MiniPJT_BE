@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.example.board.vel01.domain.Post;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, String> {
+public interface PostRepository extends JpaRepository<Post, Long> {
 	List<Post> findByNickName(String nickName);
+	Post findByPostId(Long postId);
+	void deleteByPostId(Long postId);
 }

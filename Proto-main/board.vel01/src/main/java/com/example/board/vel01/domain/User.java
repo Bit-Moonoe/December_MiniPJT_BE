@@ -3,8 +3,13 @@ package com.example.board.vel01.domain;
 import io.jsonwebtoken.Claims;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,19 +20,26 @@ import java.util.List;
 @Getter @Setter
 @Builder
 @Table(name = "user_info")
+@ToString
 public class User {
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     private String id;
-    @Column
+    
+    @Column(nullable = false)
+    @Size(min = 2,max = 12)
+    @NotNull
     private String nickName;
+    
     @Column(length = 100, nullable = false)
+    @NotNull
     private String pwd;
 
     private String token;
-
     
+//    @OneToMany
+//    private Post post;
 
     @Setter
     @Getter
@@ -36,14 +48,18 @@ public class User {
     @AllArgsConstructor
     @ToString
     public static class Request {
-    	private String id;
+    	
+    	@NotBlank(message = "공백 허용하지 않음")
+        @NotNull(message = "null 허용하지 않음")
         private String nickName;
+    	
+    	@NotBlank(message = "공백 허용하지 않음")
+        @NotNull(message = "null 허용하지 않음")
         private String pwd;
 
         public static User toEntity(final Request request) {
             return User.builder()
                     .nickName(request.getNickName())
-                    .id(request.getId())
                     .pwd(request.getPwd())
                     .build();
         }
@@ -58,7 +74,6 @@ public class User {
     public static class Response {
         private String id;
         private String nickName;
-        private String pwd;
         private String token;
 
 
@@ -66,7 +81,6 @@ public class User {
             return User.Response.builder()
                     .id(user.getId())
                     .nickName(user.getNickName())
-                    .pwd(user.getPwd())
                     .token(user.getToken())
                     .build();
         }

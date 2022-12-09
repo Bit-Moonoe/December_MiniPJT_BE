@@ -1,0 +1,5 @@
+package com.example.board.vel01.api;
+
+public class CommentController {
+
+}

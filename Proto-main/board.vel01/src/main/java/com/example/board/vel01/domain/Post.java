@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -23,19 +25,37 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 @Table(name = "post")
 public class Post {
+	
 	@Id
-	@GeneratedValue(generator = "system-uuid")
-	@GenericGenerator(name = "system-uuid", strategy = "uuid")
-    private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "post_id")
+    private Long postId;
+	
+	@Column
+	@NotNull
     private String nickName;
+	
+	@Column
+	@NotNull
     private String title;
+	
+	@Column
+	@NotNull
     private String content;
+	
+	@Column
+	@NotNull
     private String comment;
+	
+	@Column
     private Long viewCount;
-    private String error;
-    private boolean done;
-    
-    
+	
+	@Column
+	private String createdDate;
+	
+	@Column
+	private String err;
+   
     @Getter@Setter
 	@ToString
 	@Builder
@@ -43,36 +63,34 @@ public class Post {
 	@AllArgsConstructor
     public static class Request{
     	
-    	private String id;
         private String nickName;
+        
+        @NotNull(message = "게시글 제목은 null 금지")
+        @NotBlank(message = "게시글 제목은 공백 금지")
         private String title;
+        
+        @NotNull(message = "게시글 내용은 null 금지")
+        @NotBlank(message = "게시글 내용은 공백 금지")
         private String content;
+        
         private String comment;
-        private Long viewCount; 
         
         public Request(final Post postEntity) {
-//        	this.id = postEntity.getId();
         	this.nickName = postEntity.getNickName();
         	this.title = postEntity.getTitle();
         	this.content = postEntity.getContent();
         	this.comment = postEntity.getComment();
-        	this.viewCount = postEntity.getViewCount();
         }
-        
-    	
     	
     	public static Post toEntity(Post.Request req) {
     		return Post.builder()
-    				.id(req.getId())
     				.nickName(req.getNickName())
     				.title(req.getTitle())
     				.content(req.getContent())
     				.comment(req.getComment())
-    				.viewCount(req.getViewCount())
     				.build();
     	}
     }
-    
     
     @Getter@Setter
    	@ToString
@@ -81,34 +99,26 @@ public class Post {
    	@AllArgsConstructor
     public static class Response{
     	
-    	private String id;
+    	private Long postId;
         private String nickName;
         private String title;
         private String content;
         private String comment;
+        private String createdDate;
         private Long viewCount;
-        private boolean done;
-        private String error;
+        private String err;
         
-//        public Response(final Post postEntity) {
-//        	this.id = postEntity.getId();
-//        	this.nickName = postEntity.getNickName();
-//        	this.Title = postEntity.getTitle();
-//        	this.content = postEntity.getContent();
-//        	this.comment = postEntity.getComment();
-//        	this.viewCount = postEntity.getViewCount();
-//        }
     	
     	public static Post.Response toResponse(Post postEntity){
     		
     		return Post.Response.builder()
-    				.id(postEntity.getId())
+    				.postId(postEntity.getPostId())
     				.nickName(postEntity.getNickName())
     				.title(postEntity.getTitle())
     				.content(postEntity.getContent())
+    				.createdDate(postEntity.getCreatedDate())
     				.comment(postEntity.getComment())
     				.viewCount(postEntity.getViewCount())
-    				.error(postEntity.getError())
     				.build();
     	}
     	

@@ -1,0 +1,81 @@
+package com.example.board.vel01.service;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import com.example.board.vel01.domain.Comment;
+import com.example.board.vel01.domain.Post;
+import com.example.board.vel01.repository.CommentRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class CommentService {
+	
+	private final CommentRepository commentRepository;
+	
+	// 댓글 작성 = C 
+	public void saveComment(Comment comment) {
+		commentRepository.save(comment);
+	}
+	
+	
+	// 댓글 전체 조회 = R 
+	public List<Comment> retrieveCommentList() {
+		List<Comment> comments = commentRepository.findAll();
+		return comments;
+	}
+	
+	// 댓글 수정 = U
+	public Comment updateComment(Comment.Request req, Long commentId){
+		Comment commentEntity = Comment.Request.toEntity(req);
+		validation(commentEntity);
+		Optional<Comment> findComment = commentRepository.findById(commentId);
+		
+//		Comment getComment = findComment.get();
+//		getComment.setContent(req.getContent());
+//		getComment.setCreatedDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+//		commentRepository.save(getComment);
+		
+		findComment.ifPresent(comment->{
+			comment.setContent(req.getContent());
+			comment.setCreatedDate(new SimpleDateFormat("yy/MM/dd").format(new Date()));
+			commentRepository.save(comment);
+		});	
+		Comment updateComment = findComment.get();
+		return updateComment;
+	}
+	
+	// 댓글 삭제 = D
+	public List<Comment> deleteComment(Long commentId){
+		Comment comment = commentRepository.findByCommentId(commentId);
+		commentRepository.delete(comment);
+		List<Comment> comments = commentRepository.findAll();
+		
+		return comments;
+	}
+	
+	private void validation(final Comment commentEntity) {
+		if(commentEntity == null) {
+			log.warn("commentEntity cannat be null");
+		throw new RuntimeException("commentEntity는 null 허용 불가");	
+		}
+		
+		if(commentEntity.getContent() == null) {
+			log.warn("Conntent == null");
+		throw new RuntimeException("내용을 입력해주세요.");
+		}
+	};
+	
+	
+	
+	
+}

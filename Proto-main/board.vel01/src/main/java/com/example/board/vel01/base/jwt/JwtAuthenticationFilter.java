@@ -1,61 +1,64 @@
-//package com.example.board.vel01.base.jwt;
-//
-//import com.example.board.vel01.domain.User;
-//import com.example.board.vel01.model.UserDto;
-//import io.jsonwebtoken.ExpiredJwtException;
-//import java.io.IOException;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
-//import javax.servlet.FilterChain;
-//import javax.servlet.ServletException;
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//import lombok.Builder;
-//import lombok.Getter;
-//
-//import lombok.extern.slf4j.Slf4j;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.http.HttpHeaders;
-//import org.springframework.util.StringUtils;
-//import org.springframework.web.filter.OncePerRequestFilter;
-//
-//
-//@Getter
-//public class JwtAuthenticationFilter extends OncePerRequestFilter {
-//
-//    private final JwtTokenProvider jwtTokenProvider;
-//
-//    @Builder
-//    private JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-//
-//        this.jwtTokenProvider = jwtTokenProvider;
-//    }
-//
-//
-//
-//    public static JwtAuthenticationFilter of(JwtTokenProvider jwtTokenProvider) {
-//        return JwtAuthenticationFilter.builder()
-//                .jwtTokenProvider(jwtTokenProvider)
-//                .build();
-//    }
-//
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-//                                    FilterChain filterChain) throws IOException, ServletException {
-//        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-//
-//        try {
-//            UserDto user = jwtTokenProvider.getUserDtoOf(authorizationHeader);
-//            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-//                    user,
-//                    "",
-//                    user.getAuthorities()));
-//
-//            filterChain.doFilter(request, response);
-//        } catch (ExpiredJwtException exception) {
-//            logger.error("ExpiredJwtException", exception);
-//        }
-//    }
-//}
+package com.example.board.vel01.base.jwt;
+
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter{
+	
+	@Autowired
+	private JwtTokenProvider tokenProvider;
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		try {
+			String token = parseBearerToken(request);
+			log.info("Filter is running...");
+			if(token != null && !token.equalsIgnoreCase("null")) {
+				String userId = tokenProvider.validateAndGetUserId(token);
+				log.info("Authenticated user ID: " + userId);
+				AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, AuthorityUtils.NO_AUTHORITIES);
+				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+				securityContext.setAuthentication(authentication);
+				SecurityContextHolder.setContext(securityContext);
+				
+			}
+		}catch (Exception ex) {
+			logger.error("Could not set user authentication in security context", ex);
+		}
+		
+		filterChain.doFilter(request, response);
+		
+	}
+
+	private String parseBearerToken(HttpServletRequest request) {
+		String bearerToken = request.getHeader("Authorization");
+		if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7);
+		}
+		return null;
+	}
+
+
+}
+

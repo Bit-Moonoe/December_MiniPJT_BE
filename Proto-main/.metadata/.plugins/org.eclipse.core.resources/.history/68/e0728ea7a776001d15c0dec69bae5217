@@ -1,0 +1,18 @@
+package com.example.board.vel01.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.example.board.vel01.domain.Comment;
+
+@Service
+public class CommentService {
+
+	// 조회
+	public List<Comment> getComment(Comment.Request req) {
+		
+		return null;
+	}
+	
+}

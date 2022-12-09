@@ -1,5 +1,7 @@
 package com.example.board.vel01.service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +27,7 @@ public class PostService{
 
 	public List<Post> createPost(final Post postEntity){
 		validation(postEntity);
+		postEntity.setCreatedDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
 		postRepository.save(postEntity);
 		log.info("post");
 		return postRepository.findByNickName(postEntity.getNickName());
@@ -50,27 +53,29 @@ public class PostService{
 	public List<Post> update(final Post postEntity){
 		validation(postEntity);
 		
-		final Optional<Post> userCheck = postRepository.findById(postEntity.getId());
+		final Post post = postRepository.findByPostId(postEntity.getPostId());
 		
-		userCheck.ifPresent(post->{
-			post.setNickName(postEntity.getNickName());
-			post.setContent(postEntity.getContent());
-			post.setTitle(postEntity.getTitle());
-			postRepository.save(post);
-		});
+		
+//		userCheck.ifPresent(post->{
+//			post.setNickName(postEntity.getNickName());
+//			post.setContent(postEntity.getContent());
+//			post.setTitle(postEntity.getTitle());
+//			postRepository.save(post);
+//		});
 		
 		return retrieve(postEntity.getNickName());
 	}
 	
 	
-	public List<Post> delete(final Post postEntity){
+	public List<Post> delete(final Post postEntity, Long postId){
 		validation(postEntity);
 		
 		try {
-			postRepository.delete(postEntity);
+//			postRepository.delete(postEntity);
+			postRepository.deleteByPostId(postId);
 		}catch(Exception e) {
-			log.error("Post 삭제 중 에러 발생.", postEntity.getId(), e);
-			throw new RuntimeException("삭제 중 에러 발생" + postEntity.getId());
+			log.error("Post 삭제 중 에러 발생.", postEntity.getPostId(), e);
+			throw new RuntimeException("삭제 중 에러 발생" + postEntity.getPostId());
 		}
 		
 		return retrieve(postEntity.getNickName());

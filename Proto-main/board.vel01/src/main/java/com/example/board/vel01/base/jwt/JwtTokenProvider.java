@@ -18,48 +18,31 @@ public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
 
-    private final static String SECRECTKEY = "KTRKEKTEJTKJETJKERJTKFKJSFNNFFKFERKR";
+    private final static String SECRET_KEY = "KTRKEKTEJTKJETJKERJTKFKJSFNNFFKFERKR";
 
-    public String makeJwtToken(User.Request user) {
+    public String makeJwtToken(User user) {
         Date now = new Date();
 
         return Jwts.builder()
                 .setIssuer(jwtProperties.getIssuer())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + Duration.ofMinutes(30).toMillis()))
-                .claim("nickName", user.getNickName())
-                .signWith(SignatureAlgorithm.HS256, SECRECTKEY)
+                .claim("UserID", user.getId())
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+    
+    public String validateAndGetUserId(String token) {
+		Claims claims = Jwts.parser()
+				.setSigningKey(SECRET_KEY)
+				.parseClaimsJws(token)
+				.getBody();
+		
+		return claims.getSubject();
+	}
 
 
 
-//    public User.Response getUserDtoOf(String authorizationHeader) {
-//        validationAuthorizationHeader(authorizationHeader);
-//
-//        String token = extractToken(authorizationHeader);
-//        Claims claims = parsingToken(token);
-//
-//        return new User.Response(claims);
-//    }
 
-//    private Claims parsingToken(String token) {
-//        return Jwts.parser()
-//                .setSigningKey(jwtProperties.getSecretKey())
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-//
-//
-//
-//    private void validationAuthorizationHeader(String header) {
-//        if (header == null || !header.startsWith(jwtProperties.getTokenPrefix())) {
-//            throw new IllegalArgumentException();
-//        }
-//    }
-//
-//    private String extractToken(String authorizationHeader) {
-//        return authorizationHeader.substring(jwtProperties.getTokenPrefix().length());
-//    }
 
 }
